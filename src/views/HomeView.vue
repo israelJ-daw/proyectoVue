@@ -1,85 +1,86 @@
 <template>
-  <div class="container">
-    <h1>Home</h1>
-    <p>Bienvenido a la aplicación Deezer Music Client.</p>
-    <p>
-      Este proyecto sirve de base para la aplicación a desarrollar como tarea
-      del curso.
-    </p>
-    <p>
-      Para facilitar el desarrollo, este proyecto ya viene configruado con
-      Bootstrap, Bootstrap Icons, SASS, router y Pinia
-    </p>
-  </div>
-  <div class="row">
-    <div class="col-md-6"><h1>Bootstrap Icons</h1>
-    <p>Bootstrap Icons es una biblioteca de iconos creada por el equipo de Bootstrap. Proporciona una colección de iconos SVG gratuitos y de código abierto que se pueden utilizar fácilmente en proyectos web.</p>
-    <p class="text-bg-light p-3 border" >
-  <i class="bi bi-alarm" style="font-size: 2rem; color: cornflowerblue;"></i> 
-  <code> &lt;i class="bi bi-alarm" style="font-size: 2rem; color: cornflowerblue;"&gt;&lt;/i&gt;</code>
-  <br>
-  <i class="bi bi-battery-half" style="font-size: 2rem; color: darkorange;"></i> 
-  <code> &lt;i class="bi bi-battery-half" style="font-size: 2rem; color: darkorange;"&gt;&lt;/i&gt;</code>
-  <br>
-  <i class="bi bi-cloud-sun" style="font-size: 2rem; color: gold;"></i> 
-  <code> &lt;i class="bi bi-cloud-sun" style="font-size: 2rem; color: gold;"&gt;&lt;/i&gt;</code>
-  <br>
-  <i class="bi bi-emoji-smile" style="font-size: 2rem; color: green;"></i> 
-  <code> &lt;i class="bi bi-emoji-smile" style="font-size: 2rem; color: green;"&gt;&lt;/i&gt;</code>
-      <p>Puedes encontrar la lista completa de iconos en <a href="https://icons.getbootstrap.com/">su web oficial.</a>
-      </p>
-    </p>
-  </div>
-    <div class="col-md-6 sass-example">
-      <h1>SASS</h1>
-      <p>SASS (Syntactically Awesome Stylesheets) es un preprocesador de CSS que permite escribir hojas de estilo de una manera más eficiente y organizada.</p>
-      <p>Este proyecto ya viene configurado con SASS, por lo que puedes empezar a utilizarlo en tus estilos de inmediato.</p>
-      <p class="psass">
-    SASS  es un preprocesador CSS que agrega características como:
-    <ul>
-      <li>Anidación de estilos</li>
-      <li>Variables</li>
-      <li>Mixins</li>
-      <li>Herencia</li>
-    </ul>
-    Todo esto mejora la mantenibilidad del código CSS.
-  </p>
+  <div class="home-container">
+    <!-- Sección de bienvenida -->
+    <header class="welcome-section">
+      <h1>Bienvenido a Deezer Music Client</h1>
+      <p>Explora y disfruta de tu música favorita :D</p>
+    </header>
+
+    <!-- Carrusel de artistas más escuchados -->
+    <div class="carousel-container">
+      <Swiper
+        :modules="[Navigation, Pagination, Autoplay]"
+        :slides-per-view="3"
+        :space-between="30"
+        :loop="true"
+        :autoplay="{ delay: 3000, disableOnInteraction: false }"
+        navigation
+        pagination
+      >
+        <SwiperSlide v-for="artist in topArtists" :key="artist.id">
+          <img :src="artist.picture_big" :alt="artist.name" class="artist-image" />
+          <p class="artist-name">{{ artist.name }}</p>
+        </SwiperSlide>
+      </Swiper>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref, onMounted } from "vue";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
+const topArtists = ref([]);
+
+onMounted(async () => {
+  const res = await fetch("https://api.deezer.com/chart");
+  const data = await res.json();
+  topArtists.value = data.artists.data.slice(0, 10);
+});
+</script>
 
 <style scoped>
-h1 {
-  color: #007bff;
-}
-.sass-example {
-  .psass {
-    font-size: 16px;
-    line-height: 1.5;
-    color: #333;
-    padding: 10px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-
-    ul {
-      margin-top: 10px;
-      padding-left: 20px;
-      list-style-type: square;
-
-      li {
-        margin-bottom: 5px;
-        color: #555;
-        font-weight: bold;
-
-        &:hover {
-          color: #007bff; 
-          text-decoration: underline;
-        }
-      }
-    }
-  }
+.home-container {
+  text-align: center;
+  padding: 40px;
+  background: #fafafa;
 }
 
+.welcome-section h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.welcome-section p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.carousel-container {
+  margin-top: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.artist-image {
+  width: 100%;
+  border-radius: 10px;
+  transition: transform 0.3s;
+}
+
+.artist-image:hover {
+  transform: scale(1.05);
+}
+
+.artist-name {
+  margin-top: 10px;
+  font-weight: bold;
+}
 </style>
