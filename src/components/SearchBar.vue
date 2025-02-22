@@ -1,83 +1,70 @@
 <template>
-  <div class="search-container">
-    <div class="search-input">
-      <input
-        type="text"
-        v-model="searchQuery"
-        @keyup.enter="searchDeezer"
-        placeholder="Buscar en Deezer"
-      />
-      <button @click="searchDeezer">
-        <i class="bi bi-search"></i> <!-- Ícono de búsqueda de Bootstrap -->
-      </button>
-    </div>
+  <div class="search-bar">
+    <input
+      type="text"
+      v-model="query"
+      placeholder="Busca canciones, álbumes o artistas..."
+      @input="onSearch"
+    />
+    <button @click="clearSearch" v-if="query.trim()">X</button>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
-const searchQuery = ref(""); // Estado reactivo para la barra de búsqueda
+import { ref } from 'vue';
 
-// Define la función para emitir eventos
-const emit = defineEmits(["results"]);
+const emit = defineEmits(['search']);
 
-// Función para realizar la búsqueda
-const searchDeezer = async () => {
-  if (searchQuery.value.trim() === "") return; // Evita búsquedas vacías
-  const url = `http://localhost:8080/https://api.deezer.com/search?q=${encodeURIComponent(searchQuery.value)}`;
-  console.log('URL:', url);
-  try {
-    const response = await fetch(url);
-    console.log('Response:', response);
-    if (!response.ok) {
-      throw new Error("Error al buscar en Deezer");
-    }
-    const data = await response.json();
-    console.log('Data:', data);
-    emit("results", data.data); // Emitimos los resultados al componente padre
-  } catch (error) {
-    console.error(error.message);
+const query = ref('');
+
+const onSearch = () => {
+  if (query.value.trim()) {
+    emit('search', query.value);
   }
+};
+
+const clearSearch = () => {
+  query.value = '';
+  emit('search', '');
 };
 </script>
 
 <style scoped>
-.search-container {
+.search-bar {
   display: flex;
   justify-content: center;
-  margin: 20px 0;
-}
-
-.search-input {
-  width: 90%;
-  max-width: 600px; /* Opcional: limitar el ancho máximo */
-  display: flex;
   align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #fff;
-  padding: 0;
-}
-
-.search-input input {
-  flex: 1;
-  border: none;
-  outline: none;
+  position: relative;
+  margin-bottom: 20px;
   padding: 10px;
+}
+
+input[type="text"] {
+  padding: 12px 20px;
+  width: 350px;
+  border-radius: 25px;
+  border: 2px solid #4CAF50;
+  background-color: #f3f3f3;
   font-size: 16px;
-  border-radius: 5px 0 0 5px;
+  transition: border-color 0.3s;
 }
 
-.search-input button {
-  border: none;
+input[type="text"]:focus {
+  border-color: #4CAF50;
+}
+
+button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
   background-color: transparent;
-  padding: 0 10px;
-  cursor: pointer;
-  color: #777;
+  border: none;
+  color: #888;
   font-size: 20px;
+  cursor: pointer;
 }
 
-.search-input button:hover {
-  color: #000;
+button:hover {
+  color: #333;
 }
 </style>

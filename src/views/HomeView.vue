@@ -1,86 +1,108 @@
 <template>
-  <div class="home-container">
-    <!-- Sección de bienvenida -->
-    <header class="welcome-section">
-      <h1>Bienvenido a Deezer Music Client</h1>
-      <p>Explora y disfruta de tu música favorita :D</p>
-    </header>
+  <div class="home-view">
+    <!-- Sección de bienvenida con mensaje destacado -->
+    <section class="welcome-section">
+      <h1>¡Bienvenido a Deezer Music!</h1>
+      <p>
+        Disfruta de la música más actual, desde tus artistas favoritos hasta las canciones que marcan tendencia. 
+        Explora, descubre y déjate llevar por el ritmo.
+      </p>
+    </section>
 
-    <!-- Carrusel de artistas más escuchados -->
-    <div class="carousel-container">
-      <Swiper
-        :modules="[Navigation, Pagination, Autoplay]"
-        :slides-per-view="3"
-        :space-between="30"
-        :loop="true"
-        :autoplay="{ delay: 3000, disableOnInteraction: false }"
-        navigation
-        pagination
-      >
-        <SwiperSlide v-for="artist in topArtists" :key="artist.id">
-          <img :src="artist.picture_big" :alt="artist.name" class="artist-image" />
-          <p class="artist-name">{{ artist.name }}</p>
-        </SwiperSlide>
-      </Swiper>
-    </div>
+    <!-- Sección de artistas destacados -->
+    <section class="featured-artists">
+      <h2>🎤 Artistas Destacados</h2>
+      <p>Sumérgete en las últimas estrellas que están dominando las listas de éxitos. ¡Conoce a los artistas más escuchados del momento!</p>
+      <SongCarousel title="Artistas Destacados" :items="artists" />
+    </section>
+
+    <!-- Sección de canciones destacadas -->
+    <section class="featured-songs">
+      <h2>🎵 Canciones Destacadas</h2>
+      <p>Las canciones más populares y recomendadas por nuestros expertos. ¡No te pierdas los hits que todos están escuchando!</p>
+      <SongCarousel title="Canciones Destacadas" :items="songs" />
+    </section>
   </div>
 </template>
 
-<script setup>
+<script>
 import { ref, onMounted } from "vue";
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import { fetchFeaturedData } from "@/api/apiFuncional.js";
+import SongCarousel from "@/components/SongCarousel.vue";
 
-const topArtists = ref([]);
+export default {
+  components: { SongCarousel },
+  setup() {
+    const artists = ref([]);
+    const songs = ref([]);
 
-onMounted(async () => {
-  const res = await fetch("https://api.deezer.com/chart");
-  const data = await res.json();
-  topArtists.value = data.artists.data.slice(0, 10);
-});
+    const loadData = async () => {
+      const { artists: fetchedArtists, songs: fetchedSongs } = await fetchFeaturedData();
+      console.log("🔍 Artistas cargados:", fetchedArtists);
+      console.log("🔍 Canciones cargadas:", fetchedSongs);
+      artists.value = fetchedArtists;
+      songs.value = fetchedSongs;
+    };
+
+    onMounted(loadData);
+
+    return { artists, songs };
+  },
+};
 </script>
 
 <style scoped>
-.home-container {
+.home-view {
+  padding: 20px;
   text-align: center;
-  padding: 40px;
-  background: #fafafa;
+  background-color: #f0f0f0;
+}
+
+.welcome-section {
+  margin-bottom: 40px;
 }
 
 .welcome-section h1 {
   font-size: 2.5rem;
+  color: #FF4081;
   font-weight: bold;
-  color: #333;
 }
 
 .welcome-section p {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #555;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
-.carousel-container {
-  margin-top: 30px;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+.featured-artists,
+.featured-songs {
+  margin-top: 40px;
+  margin-bottom: 40px;
 }
 
-.artist-image {
-  width: 100%;
-  border-radius: 10px;
-  transition: transform 0.3s;
+.featured-artists h2,
+.featured-songs h2 {
+  font-size: 2rem;
+  color: #FF4081;
+  margin-bottom: 10px;
 }
 
-.artist-image:hover {
-  transform: scale(1.05);
+.featured-artists p,
+.featured-songs p {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 20px;
 }
 
-.artist-name {
-  margin-top: 10px;
-  font-weight: bold;
+@media (max-width: 768px) {
+  .welcome-section h1 {
+    font-size: 2rem;
+  }
+  
+  .welcome-section p {
+    font-size: 1rem;
+  }
 }
 </style>
